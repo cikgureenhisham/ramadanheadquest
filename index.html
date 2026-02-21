@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RAMADAN HEAD</title>
+    
+    <style>
+        :root {
+            --soft-pink: #fce4ec;
+            --main-pink: #f06292;
+            --dark-pink: #880e4f;
+            --cute-peach: #ffccbc;
+            --strawberry: #ff80ab;
+            --sky-blue: #b3e5fc;
+            --gold: #ffd700;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+            background-color: var(--soft-pink);
+            background-image: radial-gradient(#f8bbd0 2px, transparent 2px);
+            background-size: 30px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            color: var(--dark-pink);
+        }
+
+        #game-wrapper {
+            width: 95%;
+            max-width: 500px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 40px;
+            border: 8px solid var(--main-pink);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 15px 0 #f48fb1, 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        #video-container {
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            width: 100px;
+            height: 75px;
+            border: 3px solid var(--main-pink);
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            z-index: 10;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        #hud {
+            width: 100%;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-around;
+            background: var(--main-pink);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            z-index: 20;
+        }
+
+        #main-stage {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .side-container {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .side-instruction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .side-instruction.active {
+            transform: scale(1.1);
+        }
+
+        .arrow-box {
+            font-size: 2.5rem;
+            animation: floating 1.5s infinite ease-in-out;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .instruction-text {
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            border-radius: 20px;
+            color: white;
+        }
+
+        .bg-strawberry { background-color: var(--strawberry); }
+        .bg-cyan { background-color: var(--sky-blue); color: var(--dark-pink); }
+
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        .character-box {
+            font-size: 80px;
+            margin-bottom: 10px;
+            animation: heartBeat 2s infinite;
+        }
+
+        @keyframes heartBeat {
+            0%, 20%, 100% { transform: scale(1); }
+            10% { transform: scale(1.1); }
+        }
+
+        .question-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 30px;
+            border: 4px solid var(--soft-pink);
+            font-size: 1.15rem;
+            width: 85%;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.4;
+            box-shadow: 0 10px 0 var(--soft-pink);
+        }
+
+        #feedback-icon {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 8rem;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .anim-pop { animation: popOut 1s forwards; }
+
+        @keyframes popOut {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--soft-pink);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .btn-cute {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: var(--main-pink);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 8px 0 var(--dark-pink);
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        #loading-spinner {
+            border: 8px solid white;
+            border-top: 8px solid var(--main-pink);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div id="hud">
+            <div>🕌 Skor: <span id="score">0</span></div>
+            <div>Misi <span id="q-num">1</span>/10</div>
+        </div>
+
+        <div id="video-container">
+            <video id="webcam" autoplay playsinline></video>
+        </div>
+
+        <div id="main-stage">
+            <div class="side-container">
+                <div id="guide-left" class="side-instruction">
+                    <div class="arrow-box">🕌</div>
+                    <div class="instruction-text bg-strawberry">GERAK KIRI (TIDAK/SALAH)</div>
+                </div>
+                <div id="guide-right" class="side-instruction">
+                    <div class="arrow-box">🌙</div>
+                    <div class="instruction-text bg-cyan">GERAK KANAN (YA/BETUL)</div>
+                </div>
+            </div>
+
+            <div class="center-content">
+                <div id="char" class="character-box">🕋</div>
+                <div id="question" class="question-card">Sila tunggu sebentar ya... ✨</div>
+                <div id="feedback-icon"></div>
+            </div>
+        </div>
+
+        <!-- Overlays -->
+        <div id="overlay">
+            <div id="loading-box">
+                <div id="loading-spinner"></div>
+                <p style="font-weight: bold; margin-top: 15px;">Menyediakan Ramadan Head... 🕌</p>
+            </div>
+            
+            <div id="start-box" style="display:none">
+                <div style="font-size: 5rem;">🕌</div>
+                <h1 style="font-size: 2.5rem; color: var(--dark-pink); margin: 0;">Ramadan Head 🌙</h1>
+                <p style="font-size: 1.1rem; color: var(--main-pink); margin-bottom: 20px;">Gerakkan kepala untuk menjawab!</p>
+                
+                <div style="background: white; padding: 20px; border-radius: 25px; margin-bottom: 25px; font-size: 1rem; box-shadow: 0 5px 0 var(--soft-pink);">
+                    <p style="margin: 5px 0;">🕌 <b>KIRI</b> = TIDAK / SALAH</p>
+                    <p style="margin: 5px 0;">🌙 <b>KANAN</b> = YA / BETUL</p>
+                </div>
+
+                <button id="start-btn" class="btn-cute">MULA MAIN! 🕋</button>
+            </div>
+
+            <div id="end-box" style="display:none">
+                <div style="font-size: 4rem;">🤲</div>
+                <h1 style="font-size: 2.5rem; color: var(--dark-pink);">ALHAMDULILLAH!</h1>
+                <p id="final-msg" style="font-size: 1.8rem; color: var(--main-pink);"></p>
+                <button class="btn-cute" onclick="location.reload()">MAIN LAGI 📿</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+
+        let faceLandmarker;
+        const video = document.getElementById("webcam");
+        let score = 0, currentQ = 0, canAnswer = false;
+        
+        // Soalan telah disemak semula untuk ketepatan hukum fiqh 100%
+        const questions = [
+            { q: "Niat puasa wajib dilakukan pada waktu malam sebelum masuk waktu Subuh.", a: "ya" },
+            { q: "Makan tanpa sengaja kerana terlupa membatalkan puasa.", a: "tidak" },
+            { q: "Hukum puasa Ramadan adalah Wajib bagi umat Islam yang mampu.", a: "ya" },
+            { q: "Muntah dengan sengaja akan menyebabkan puasa seseorang terbatal.", a: "ya" },
+            { q: "Kanak-kanak yang belum baligh diwajibkan oleh syarak untuk berpuasa penuh.", a: "tidak" },
+            { q: "Mencaci maki orang lain boleh mengurangkan pahala puasa seseorang.", a: "ya" },
+            { q: "Berus gigi sehingga tertelan air dengan sengaja membatalkan puasa.", a: "ya" },
+            { q: "Tidur sepanjang hari secara automatik membatalkan puasa.", a: "tidak" },
+            { q: "Memasukkan sesuatu ke dalam rongga terbuka dengan sengaja membatalkan puasa.", a: "ya" },
+            { q: "Adakah berbuka puasa dengan makanan yang haram dibenarkan?", a: "tidak" }
+        ];
+
+        async function initAI() {
+            try {
+                const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+                faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+                    baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, delegate: "GPU" },
+                    outputFaceBlendshapes: true, runningMode: "VIDEO", numFaces: 1
+                });
+                document.getElementById("loading-box").style.display = "none";
+                document.getElementById("start-box").style.display = "block";
+            } catch (e) {
+                document.getElementById("loading-spinner").style.display = "none";
+                document.getElementById("loading-box").innerText = "Gagal memuatkan sistem AI. Sila muat semula halaman.";
+            }
+        }
+
+        async function startGame() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                video.srcObject = stream;
+                document.getElementById("overlay").style.display = "none";
+                video.onloadeddata = () => { predict(); loadQuestion(); };
+            } catch (err) {
+                alert("Sila benarkan akses kamera untuk bermain.");
+            }
+        }
+
+        function loadQuestion() {
+            if(currentQ >= questions.length) { endGame(); return; }
+            document.getElementById("question").innerText = questions[currentQ].q;
+            document.getElementById("q-num").innerText = currentQ + 1;
+            document.getElementById("char").innerText = currentQ % 2 === 0 ? "👦" : "👧";
+            
+            // Jarak masa antara soalan supaya pemain tidak terlanggar jawapan secara tidak sengaja
+            setTimeout(() => { canAnswer = true; }, 1800);
+        }
+
+        function checkAnswer(userChoice) {
+            if(!canAnswer) return;
+            canAnswer = false;
+            const correct = questions[currentQ].a;
+            const feedbackIcon = document.getElementById("feedback-icon");
+            
+            if(userChoice === correct) {
+                score += 10;
+                document.getElementById("score").innerText = score;
+                feedbackIcon.innerText = "✨"; // Simbol kejayaan yang lebih baik
+                feedbackIcon.style.color = "#4caf50";
+            } else { 
+                feedbackIcon.innerText = "❌"; 
+                feedbackIcon.style.color = "#f44336";
+            }
+            
+            feedbackIcon.classList.remove("anim-pop");
+            void feedbackIcon.offsetWidth; 
+            feedbackIcon.classList.add("anim-pop");
+            
+            currentQ++;
+            // Beri masa untuk pemain melihat maklum balas sebelum soalan baru muncul
+            setTimeout(loadQuestion, 2200);
+        }
+
+        function endGame() {
+            document.getElementById("overlay").style.display = "flex";
+            document.getElementById("start-box").style.display = "none";
+            document.getElementById("end-box").style.display = "block";
+            document.getElementById("final-msg").innerText = `Skor Akhir: ${score}/100`;
+        }
+
+        function predict() {
+            const results = faceLandmarker.detectForVideo(video, performance.now());
+            if (results.faceLandmarks?.length > 0) {
+                const nose = results.faceLandmarks[0][1];
+                const leftEye = results.faceLandmarks[0][33]; 
+                const rightEye = results.faceLandmarks[0][263];
+                const noseRelative = (nose.x - leftEye.x) / Math.abs(rightEye.x - leftEye.x);
+
+                // Sensitiviti dilaraskan supaya pemain perlu gerak dengan jelas (0.32 dan 0.68)
+                if (noseRelative < 0.32) {
+                    document.getElementById("guide-right").classList.add("active");
+                    document.getElementById("guide-left").classList.remove("active");
+                    if(canAnswer) checkAnswer("ya");
+                } else if (noseRelative > 0.68) {
+                    document.getElementById("guide-left").classList.add("active");
+                    document.getElementById("guide-right").classList.remove("active");
+                    if(canAnswer) checkAnswer("tidak");
+                } else {
+                    document.getElementById("guide-left").classList.remove("active");
+                    document.getElementById("guide-right").classList.remove("active");
+                }
+            }
+            requestAnimationFrame(predict);
+        }
+
+        window.addEventListener('load', initAI);
+        document.getElementById("start-btn").addEventListener("click", startGame);
+    </script>
+</body>
+</html>
