@@ -62,7 +62,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Memastikan semua ke tengah */
+            justify-content: center; 
             align-items: center;
             width: 100%;
             padding: 10px;
@@ -123,7 +123,7 @@
         }
 
         .character-box {
-            font-size: 70px; /* Saiz emoji lebih besar dan jelas */
+            font-size: 70px; 
             margin-bottom: 10px;
             animation: heartBeat 2s infinite;
             display: flex;
@@ -266,19 +266,17 @@
         </div>
 
         <div id="overlay">
-            <!-- Loading -->
             <div id="loading-box">
                 <div id="loading-spinner"></div>
                 <p style="font-weight: bold; margin-top: 15px;">Membuka Ramadan Head... 🕌</p>
             </div>
             
-            <!-- Start Screen -->
             <div id="start-box" style="display:none">
                 <div style="font-size: 5rem;">🕌</div>
                 <h1 style="font-size: 2.5rem; color: var(--dark-pink); margin: 0;">Ramadan Head 🌙</h1>
                 <p style="font-size: 1.1rem; color: var(--main-pink); margin-bottom: 20px;">Toleh kepala untuk menjawab!</p>
                 
-                <div style="background: white; padding: 20 (px); border-radius: 25px; margin-bottom: 25px; font-size: 1rem; box-shadow: 0 5px 0 var(--soft-pink); width: 100%;">
+                <div style="background: white; padding: 20px; border-radius: 25px; margin-bottom: 25px; font-size: 1rem; box-shadow: 0 5px 0 var(--soft-pink); width: 100%;">
                     <p style="margin: 10px 0;">🕌 <b>TOLEH KIRI</b> = TIDAK / SALAH</p>
                     <p style="margin: 10px 0;">🌙 <b>TOLEH KANAN</b> = YA / BETUL</p>
                 </div>
@@ -286,7 +284,6 @@
                 <button id="start-btn" class="btn-cute">MULA MAIN! 🕋</button>
             </div>
 
-            <!-- End Screen -->
             <div id="end-box" style="display:none">
                 <div style="font-size: 4rem;">🤲</div>
                 <h1 style="font-size: 2.5rem; color: var(--dark-pink);">ALHAMDULILLAH!</h1>
@@ -302,9 +299,9 @@
         let faceLandmarker;
         const video = document.getElementById("webcam");
         let score = 0, currentQ = 0, canAnswer = false;
+        let shuffledQuestions = [];
         
-        // Soalan dengan emoji yang bersesuaian
-        const questions = [
+        const questionsBase = [
             { q: "Niat puasa wajib dilakukan pada waktu malam sebelum masuk waktu Subuh.", a: "ya", e: "🌙" },
             { q: "Makan tanpa sengaja kerana terlupa membatalkan puasa.", a: "tidak", e: "🍲" },
             { q: "Hukum puasa Ramadan adalah Wajib bagi umat Islam yang mampu.", a: "ya", e: "📜" },
@@ -336,6 +333,17 @@
             }
         }
 
+        // Fungsi untuk rawak soalan
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
         async function startGame() {
             try {
                 if (!video.srcObject) {
@@ -343,8 +351,11 @@
                     video.srcObject = stream;
                 }
                 document.getElementById("overlay").style.display = "none";
+                
+                // Rawak soalan sebelum mula
+                shuffledQuestions = shuffle([...questionsBase]);
+                
                 video.onloadedmetadata = () => { predict(); resetGameState(); };
-                // Jika video sudah ada, terus reset
                 if (video.readyState >= 2) { resetGameState(); }
             } catch (err) {
                 alert("Sila benarkan akses kamera.");
@@ -360,12 +371,12 @@
         }
 
         function loadQuestion() {
-            if(currentQ >= questions.length) { endGame(); return; }
+            if(currentQ >= shuffledQuestions.length) { endGame(); return; }
             
-            const item = questions[currentQ];
+            const item = shuffledQuestions[currentQ];
             document.getElementById("question").innerText = item.q;
             document.getElementById("q-num").innerText = currentQ + 1;
-            document.getElementById("char").innerText = item.e; // Mengikut makna soalan
+            document.getElementById("char").innerText = item.e;
             
             canAnswer = false;
             setTimeout(() => { canAnswer = true; }, 2000);
@@ -374,7 +385,7 @@
         function checkAnswer(userChoice) {
             if(!canAnswer) return;
             canAnswer = false;
-            const correct = questions[currentQ].a;
+            const correct = shuffledQuestions[currentQ].a;
             const feedbackIcon = document.getElementById("feedback-icon");
             
             if(userChoice === correct) {
