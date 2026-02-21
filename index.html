@@ -46,26 +46,6 @@
             overflow: hidden;
         }
 
-        #video-container {
-            position: absolute;
-            top: 60px;
-            right: 15px;
-            width: 100px;
-            height: 75px;
-            border: 3px solid var(--main-pink);
-            border-radius: 15px;
-            overflow: hidden;
-            background: #000;
-            z-index: 10;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
-        }
-
         #hud {
             width: 100%;
             padding: 12px 0;
@@ -82,18 +62,19 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: center; /* Memastikan semua ke tengah */
             align-items: center;
             width: 100%;
             padding: 10px;
             text-align: center;
+            gap: 15px;
         }
 
         .side-container {
             display: flex;
             width: 100%;
             justify-content: space-around;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
         }
 
         .side-instruction {
@@ -101,11 +82,15 @@
             flex-direction: column;
             align-items: center;
             gap: 5px;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 10px;
+            border-radius: 20px;
         }
 
         .side-instruction.active {
-            transform: scale(1.1);
+            transform: scale(1.3);
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .arrow-box {
@@ -120,8 +105,8 @@
 
         .instruction-text {
             font-weight: bold;
-            font-size: 0.8rem;
-            padding: 8px 12px;
+            font-size: 0.75rem;
+            padding: 6px 12px;
             border-radius: 20px;
             color: white;
         }
@@ -138,9 +123,13 @@
         }
 
         .character-box {
-            font-size: 80px;
+            font-size: 70px; /* Saiz emoji lebih besar dan jelas */
             margin-bottom: 10px;
             animation: heartBeat 2s infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80px;
         }
 
         @keyframes heartBeat {
@@ -155,29 +144,50 @@
             border: 4px solid var(--soft-pink);
             font-size: 1.15rem;
             width: 85%;
-            min-height: 120px;
+            min-height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
             line-height: 1.4;
             box-shadow: 0 10px 0 var(--soft-pink);
+            z-index: 5;
+        }
+
+        #video-container {
+            width: 140px;
+            height: 140px;
+            border: 5px solid var(--main-pink);
+            border-radius: 50%;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
         }
 
         #feedback-icon {
             position: absolute;
-            top: 40%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
             font-size: 8rem;
             z-index: 200;
             pointer-events: none;
+            text-shadow: 0 0 20px rgba(255,255,255,0.8);
         }
 
         .anim-pop { animation: popOut 1s forwards; }
 
         @keyframes popOut {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
 
@@ -192,6 +202,7 @@
             z-index: 100;
             padding: 20px;
             box-sizing: border-box;
+            text-align: center;
         }
 
         .btn-cute {
@@ -204,6 +215,11 @@
             box-shadow: 0 8px 0 var(--dark-pink);
             cursor: pointer;
             font-family: inherit;
+        }
+
+        .btn-cute:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 var(--dark-pink);
         }
 
         #loading-spinner {
@@ -222,58 +238,60 @@
 
     <div id="game-wrapper">
         <div id="hud">
-            <div>🕌 Skor: <span id="score">0</span></div>
+            <div>Skor: <span id="score">0</span></div>
             <div>Misi <span id="q-num">1</span>/10</div>
-        </div>
-
-        <div id="video-container">
-            <video id="webcam" autoplay playsinline></video>
         </div>
 
         <div id="main-stage">
             <div class="side-container">
                 <div id="guide-left" class="side-instruction">
                     <div class="arrow-box">🕌</div>
-                    <div class="instruction-text bg-strawberry">GERAK KIRI (TIDAK/SALAH)</div>
+                    <div class="instruction-text bg-strawberry">TOLEH KIRI (TIDAK)</div>
                 </div>
                 <div id="guide-right" class="side-instruction">
                     <div class="arrow-box">🌙</div>
-                    <div class="instruction-text bg-cyan">GERAK KANAN (YA/BETUL)</div>
+                    <div class="instruction-text bg-cyan">TOLEH KANAN (YA)</div>
                 </div>
             </div>
 
             <div class="center-content">
                 <div id="char" class="character-box">🕋</div>
-                <div id="question" class="question-card">Sila tunggu sebentar ya... ✨</div>
+                <div id="question" class="question-card">Sila tunggu... ✨</div>
                 <div id="feedback-icon"></div>
+            </div>
+
+            <div id="video-container">
+                <video id="webcam" autoplay playsinline></video>
             </div>
         </div>
 
-        <!-- Overlays -->
         <div id="overlay">
+            <!-- Loading -->
             <div id="loading-box">
                 <div id="loading-spinner"></div>
-                <p style="font-weight: bold; margin-top: 15px;">Menyediakan Ramadan Head... 🕌</p>
+                <p style="font-weight: bold; margin-top: 15px;">Membuka Ramadan Head... 🕌</p>
             </div>
             
+            <!-- Start Screen -->
             <div id="start-box" style="display:none">
                 <div style="font-size: 5rem;">🕌</div>
                 <h1 style="font-size: 2.5rem; color: var(--dark-pink); margin: 0;">Ramadan Head 🌙</h1>
-                <p style="font-size: 1.1rem; color: var(--main-pink); margin-bottom: 20px;">Gerakkan kepala untuk menjawab!</p>
+                <p style="font-size: 1.1rem; color: var(--main-pink); margin-bottom: 20px;">Toleh kepala untuk menjawab!</p>
                 
-                <div style="background: white; padding: 20px; border-radius: 25px; margin-bottom: 25px; font-size: 1rem; box-shadow: 0 5px 0 var(--soft-pink);">
-                    <p style="margin: 5px 0;">🕌 <b>KIRI</b> = TIDAK / SALAH</p>
-                    <p style="margin: 5px 0;">🌙 <b>KANAN</b> = YA / BETUL</p>
+                <div style="background: white; padding: 20 (px); border-radius: 25px; margin-bottom: 25px; font-size: 1rem; box-shadow: 0 5px 0 var(--soft-pink); width: 100%;">
+                    <p style="margin: 10px 0;">🕌 <b>TOLEH KIRI</b> = TIDAK / SALAH</p>
+                    <p style="margin: 10px 0;">🌙 <b>TOLEH KANAN</b> = YA / BETUL</p>
                 </div>
 
                 <button id="start-btn" class="btn-cute">MULA MAIN! 🕋</button>
             </div>
 
+            <!-- End Screen -->
             <div id="end-box" style="display:none">
                 <div style="font-size: 4rem;">🤲</div>
                 <h1 style="font-size: 2.5rem; color: var(--dark-pink);">ALHAMDULILLAH!</h1>
-                <p id="final-msg" style="font-size: 1.8rem; color: var(--main-pink);"></p>
-                <button class="btn-cute" onclick="location.reload()">MAIN LAGI 📿</button>
+                <p id="final-msg" style="font-size: 1.8rem; color: var(--main-pink); margin-bottom: 25px;"></p>
+                <button id="replay-btn" class="btn-cute">MAIN LAGI 📿</button>
             </div>
         </div>
     </div>
@@ -285,54 +303,72 @@
         const video = document.getElementById("webcam");
         let score = 0, currentQ = 0, canAnswer = false;
         
-        // Soalan telah disemak semula untuk ketepatan hukum fiqh 100%
+        // Soalan dengan emoji yang bersesuaian
         const questions = [
-            { q: "Niat puasa wajib dilakukan pada waktu malam sebelum masuk waktu Subuh.", a: "ya" },
-            { q: "Makan tanpa sengaja kerana terlupa membatalkan puasa.", a: "tidak" },
-            { q: "Hukum puasa Ramadan adalah Wajib bagi umat Islam yang mampu.", a: "ya" },
-            { q: "Muntah dengan sengaja akan menyebabkan puasa seseorang terbatal.", a: "ya" },
-            { q: "Kanak-kanak yang belum baligh diwajibkan oleh syarak untuk berpuasa penuh.", a: "tidak" },
-            { q: "Mencaci maki orang lain boleh mengurangkan pahala puasa seseorang.", a: "ya" },
-            { q: "Berus gigi sehingga tertelan air dengan sengaja membatalkan puasa.", a: "ya" },
-            { q: "Tidur sepanjang hari secara automatik membatalkan puasa.", a: "tidak" },
-            { q: "Memasukkan sesuatu ke dalam rongga terbuka dengan sengaja membatalkan puasa.", a: "ya" },
-            { q: "Adakah berbuka puasa dengan makanan yang haram dibenarkan?", a: "tidak" }
+            { q: "Niat puasa wajib dilakukan pada waktu malam sebelum masuk waktu Subuh.", a: "ya", e: "🌙" },
+            { q: "Makan tanpa sengaja kerana terlupa membatalkan puasa.", a: "tidak", e: "🍲" },
+            { q: "Hukum puasa Ramadan adalah Wajib bagi umat Islam yang mampu.", a: "ya", e: "📜" },
+            { q: "Muntah dengan sengaja akan menyebabkan puasa seseorang terbatal.", a: "ya", e: "🤮" },
+            { q: "Kanak-kanak yang belum baligh diwajibkan oleh syarak untuk berpuasa penuh.", a: "tidak", e: "🧒" },
+            { q: "Mencaci maki orang lain boleh mengurangkan pahala puasa seseorang.", a: "ya", e: "🤬" },
+            { q: "Berus gigi sehingga tertelan air dengan sengaja membatalkan puasa.", a: "ya", e: "🪥" },
+            { q: "Tidur sepanjang hari secara automatik membatalkan puasa.", a: "tidak", e: "😴" },
+            { q: "Memasukkan sesuatu ke dalam rongga terbuka dengan sengaja membatalkan puasa.", a: "ya", e: "📥" },
+            { q: "Adakah berbuka puasa dengan makanan yang haram dibenarkan?", a: "tidak", e: "🚫" }
         ];
 
         async function initAI() {
             try {
                 const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
                 faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-                    baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, delegate: "GPU" },
-                    outputFaceBlendshapes: true, runningMode: "VIDEO", numFaces: 1
+                    baseOptions: { 
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, 
+                        delegate: "CPU"
+                    },
+                    outputFaceBlendshapes: true, 
+                    runningMode: "VIDEO", 
+                    numFaces: 1
                 });
                 document.getElementById("loading-box").style.display = "none";
                 document.getElementById("start-box").style.display = "block";
             } catch (e) {
-                document.getElementById("loading-spinner").style.display = "none";
-                document.getElementById("loading-box").innerText = "Gagal memuatkan sistem AI. Sila muat semula halaman.";
+                document.getElementById("loading-box").innerText = "Gagal memuatkan AI. Sila muat semula.";
             }
         }
 
         async function startGame() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                video.srcObject = stream;
+                if (!video.srcObject) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                    video.srcObject = stream;
+                }
                 document.getElementById("overlay").style.display = "none";
-                video.onloadeddata = () => { predict(); loadQuestion(); };
+                video.onloadedmetadata = () => { predict(); resetGameState(); };
+                // Jika video sudah ada, terus reset
+                if (video.readyState >= 2) { resetGameState(); }
             } catch (err) {
-                alert("Sila benarkan akses kamera untuk bermain.");
+                alert("Sila benarkan akses kamera.");
             }
+        }
+
+        function resetGameState() {
+            score = 0;
+            currentQ = 0;
+            document.getElementById("score").innerText = "0";
+            document.getElementById("end-box").style.display = "none";
+            loadQuestion();
         }
 
         function loadQuestion() {
             if(currentQ >= questions.length) { endGame(); return; }
-            document.getElementById("question").innerText = questions[currentQ].q;
-            document.getElementById("q-num").innerText = currentQ + 1;
-            document.getElementById("char").innerText = currentQ % 2 === 0 ? "👦" : "👧";
             
-            // Jarak masa antara soalan supaya pemain tidak terlanggar jawapan secara tidak sengaja
-            setTimeout(() => { canAnswer = true; }, 1800);
+            const item = questions[currentQ];
+            document.getElementById("question").innerText = item.q;
+            document.getElementById("q-num").innerText = currentQ + 1;
+            document.getElementById("char").innerText = item.e; // Mengikut makna soalan
+            
+            canAnswer = false;
+            setTimeout(() => { canAnswer = true; }, 2000);
         }
 
         function checkAnswer(userChoice) {
@@ -344,7 +380,7 @@
             if(userChoice === correct) {
                 score += 10;
                 document.getElementById("score").innerText = score;
-                feedbackIcon.innerText = "✨"; // Simbol kejayaan yang lebih baik
+                feedbackIcon.innerText = "✨";
                 feedbackIcon.style.color = "#4caf50";
             } else { 
                 feedbackIcon.innerText = "❌"; 
@@ -356,8 +392,7 @@
             feedbackIcon.classList.add("anim-pop");
             
             currentQ++;
-            // Beri masa untuk pemain melihat maklum balas sebelum soalan baru muncul
-            setTimeout(loadQuestion, 2200);
+            setTimeout(loadQuestion, 2800);
         }
 
         function endGame() {
@@ -368,23 +403,30 @@
         }
 
         function predict() {
+            if (document.getElementById("overlay").style.display !== "none") {
+                requestAnimationFrame(predict);
+                return;
+            }
+
             const results = faceLandmarker.detectForVideo(video, performance.now());
             if (results.faceLandmarks?.length > 0) {
                 const nose = results.faceLandmarks[0][1];
-                const leftEye = results.faceLandmarks[0][33]; 
-                const rightEye = results.faceLandmarks[0][263];
-                const noseRelative = (nose.x - leftEye.x) / Math.abs(rightEye.x - leftEye.x);
+                const leftFace = results.faceLandmarks[0][234];
+                const rightFace = results.faceLandmarks[0][454];
+                
+                const rawNosePos = (nose.x - leftFace.x) / (rightFace.x - leftFace.x);
 
-                // Sensitiviti dilaraskan supaya pemain perlu gerak dengan jelas (0.32 dan 0.68)
-                if (noseRelative < 0.32) {
+                if (rawNosePos > 0.62) { 
                     document.getElementById("guide-right").classList.add("active");
                     document.getElementById("guide-left").classList.remove("active");
                     if(canAnswer) checkAnswer("ya");
-                } else if (noseRelative > 0.68) {
+                } 
+                else if (rawNosePos < 0.38) { 
                     document.getElementById("guide-left").classList.add("active");
                     document.getElementById("guide-right").classList.remove("active");
                     if(canAnswer) checkAnswer("tidak");
-                } else {
+                } 
+                else {
                     document.getElementById("guide-left").classList.remove("active");
                     document.getElementById("guide-right").classList.remove("active");
                 }
@@ -394,6 +436,7 @@
 
         window.addEventListener('load', initAI);
         document.getElementById("start-btn").addEventListener("click", startGame);
+        document.getElementById("replay-btn").addEventListener("click", startGame);
     </script>
 </body>
 </html>
