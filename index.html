@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kuiz Ramadan AI - PSS Al-Ghazali</title>
     
-    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -57,7 +56,7 @@
         .gemini-glow { 
             border-color: #fbbf24 !important; 
             background: #fffbeb !important; 
-            transform: scale(1.05); 
+            transform: scale(1.02); 
             box-shadow: 0 0 20px #fbbf24; 
         }
 
@@ -78,79 +77,61 @@
             pointer-events: none; 
         }
         
-        @keyframes scaleIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
         .scale-in { animation: scaleIn 0.3s ease-out forwards; }
-
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Reka Letak Spesifik Kuiz */
         .quiz-container-layout {
             display: flex;
-            width: calc(100% - 90px); /* 45px margin kiri + 45px margin kanan */
-            margin: 0 45px;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            gap: 30px; /* Gap antara card */
-        }
-
-        .options-side-container {
-            display: flex;
             flex-direction: column;
-            width: 48px; /* Saiz kotak pilihan */
-            align-items: center;
-            justify-content: center;
+            width: calc(100% - 90px); 
+            margin: 0 45px;
+            max-width: 384px; 
+            height: auto;
+            gap: 30px; 
         }
 
         .option-box {
-            width: 48px; /* Lebar 48px */
-            min-height: 180px; 
-            padding: 40px 0 48px 0; /* Top 40px, Bottom 48px */
+            width: 100%; 
+            padding: 40px 24px 48px 24px; 
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            border-radius: 1rem;
+            border-radius: 1.5rem;
             border-width: 3px;
-            overflow: hidden;
             position: relative;
+            min-height: 140px;
         }
 
         .option-label {
             position: absolute;
-            top: 8px;
-            font-size: 8px;
+            top: 12px;
+            left: 20px;
+            font-size: 10px;
             font-weight: 800;
             background: #d1fae5;
             color: #065f46;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
             text-transform: uppercase;
         }
 
-        .option-text {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            transform: rotate(180deg);
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #064e3b;
-        }
+        .option-text { font-size: 1.1rem; font-weight: 700; color: #064e3b; line-height: 1.2; }
 
         .question-card {
-            flex: 1;
-            height: 240px;
+            width: 100%;
+            min-height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
             text-align: center;
-            border-color: #d1fae5;
+            background: #064e3b; 
+            color: white;
+            border-color: #10b981;
         }
     </style>
 </head>
@@ -168,32 +149,9 @@
     <div class="footer-text font-bold uppercase">ARC | SK BANDAR TUN HUSSEIN ONN 2 | 2026</div>
 
     <script>
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxdI-oy3uKF-ym0Ken7mkTAcOFjrDY_JLKhmUdUQTGk-jw-GCiPAyMTSWI8aR7j51zbiQ/exec"; 
-        const ADMIN_PIN = "4055";
-
-        const originalQuestionBank = [
-            { q: "1️⃣ Puasa dari segi bahasa bermaksud? 🛑", a: "Menahan diri", b: "Makan perlahan", correct: 'left', info: "Bahasa: Menahan diri." },
-            { q: "1️⃣ Bilakah waktu tamat puasa setiap hari? 🌅", a: "Zohor", b: "Maghrib", correct: 'right', info: "Tamat puasa apabila matahari terbenam (Maghrib)." },
-            { q: "2️⃣ Niat puasa perlu dibuat pada waktu? 🌙", a: "Tengah hari", b: "Malam", correct: 'right', info: "Niat dilakukan pada waktu malam sebelum Subuh." },
-            { q: "2️⃣ Sahaja aku berpuasa esok hari... Ini lafaz? 🗣️", a: "Niat Puasa", b: "Doa Makan", correct: 'left', info: "Itu adalah sebahagian daripada lafaz niat puasa Ramadan." },
-            { q: "3️⃣ Siapakah yang wajib berpuasa? 🧠", a: "Orang Gila", b: "Orang Berakal", correct: 'right', info: "Syarat wajib: Islam, Baligh, Berakal dan Sihat." },
-            { q: "3️⃣ Adakah budak kecil yang belum baligh wajib puasa? 👶", a: "Wajib", b: "Tidak Wajib", correct: 'right', info: "Kewajipan bermula apabila seseorang itu sudah Baligh." },
-            { q: "4️⃣ Adakah muntah dengan sengaja membatalkan puasa? 🤮", a: "Batal", b: "Tidak Batal", correct: 'left', info: "Muntah dengan sengaja membatalkan puasa." },
-            { q: "4️⃣ Makan kerana TERLUPA, adakah batal puasa? 🍎", a: "Tidak Batal", b: "Ya, Batal", correct: 'left', info: "Makan secara tidak sengaja atau terlupa tidak membatalkan puasa." },
-            { q: "5️⃣ Makan sebelum Subuh dipanggil? 🥛", a: "Iftar", b: "Sahur", correct: 'right', info: "Bersahur adalah sunnah walaupun hanya minum sedikit air." },
-            { q: "5️⃣ Membaca Al-Quran beramai-ramai dipanggil? 📚", a: "Tadarus", b: "Tazkirah", correct: 'left', info: "Tadarus Al-Quran adalah amalan sunnah di bulan Ramadan." },
-            { q: "6️⃣ Malam yang lebih baik dari 1000 bulan? 💎", a: "Lailatul Qadar", b: "Malam Raya", correct: 'left', info: "Malam Lailatul Qadar adalah malam paling istimewa." },
-            { q: "6️⃣ Apakah yang berlaku kepada syaitan di bulan Ramadan? ⛓️", a: "Dilepaskan", b: "Dibelenggu", correct: 'right', info: "Pintu neraka ditutup dan syaitan dibelanggu." },
-            { q: "7️⃣ Perintah puasa diturunkan pada tahun berapa Hijrah? 📜", a: "Tahun ke-5", b: "Tahun ke-2", correct: 'right', info: "Kewajipan puasa bermula pada tahun ke-2 Hijrah." },
-            { q: "7️⃣ Di manakah tempat Al-Quran mula diturunkan? ⛰️", a: "Gua Hira'", b: "Gua Ashabul Kahfi", correct: 'left', info: "Al-Quran mula diturunkan kepada Nabi Muhammad SAW di Gua Hira'." },
-            { q: "8️⃣ Tidur berlebihan sepanjang hari hukumnya? 😴", a: "Wajib", b: "Makruh", correct: 'right', info: "Tidur berlebihan menghilangkan keberkatan dan hukumnya makruh." },
-            { q: "8️⃣ Apakah hukum mengumpat ketika berpuasa? 🙊", a: "Makruh", b: "Harus", correct: 'left', info: "Bercakap buruk atau mengumpat mengurangkan pahala puasa." },
-            { q: "9️⃣ Orang yang berjalan jauh (81km+) dipanggil? 🚗", a: "Musafir", b: "Mukim", correct: 'left', info: "Musafir diberi keringanan untuk tidak berpuasa tetapi perlu Qada'." },
-            { q: "9️⃣ Adakah orang tua yang sangat uzur wajib puasa? 👴", a: "Wajib", b: "Boleh Berbuka", correct: 'right', info: "Orang tua uzur boleh berbuka tetapi perlu membayar fidyah." },
-            { q: "10️⃣ Bilakah tarikh Nuzul Al-Quran diraikan? 📖", a: "17 Ramadan", b: "10 Ramadan", correct: 'left', info: "Nuzul Al-Quran berlaku pada 17 Ramadan." },
-            { q: "10️⃣ Al-Quran diturunkan kepada Nabi siapa? 🕊️", a: "Nabi Isa AS", b: "Nabi Muhammad SAW", correct: 'right', info: "Al-Quran diturunkan kepada Nabi terakhir, Muhammad SAW." }
-        ];
-
+        // URL Baharu yang anda berikan
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbx4xrg8AkkPtviVuiIQd4yZjkRvJK3EIo5zD0GiqAWFdbEke6OBvdiEqRArLmecsnpJug/exec"; 
+        
         let questionBank = [];
         let currentIdx = 0, score = 0, progress = 0, selectedHand = 'none';
         let studentName = "", studentClass = "", isChecking = false, currentTab = 'register';
@@ -201,7 +159,21 @@
         let isFetching = false;
         let fetchError = false;
 
+        const originalQuestionBank = [
+            { q: "Puasa dari segi bahasa bermaksud? 🛑", a: "Menahan diri", b: "Makan perlahan", correct: 'left', info: "Bahasa: Menahan diri." },
+            { q: "Bilakah waktu tamat puasa setiap hari? 🌅", a: "Zohor", b: "Maghrib", correct: 'right', info: "Tamat puasa apabila matahari terbenam (Maghrib)." },
+            { q: "Niat puasa perlu dibuat pada waktu? 🌙", a: "Tengah hari", b: "Malam", correct: 'right', info: "Niat dilakukan pada waktu malam sebelum Subuh." },
+            { q: "Sahaja aku berpuasa esok hari... Ini lafaz? 🗣️", a: "Niat Puasa", b: "Doa Makan", correct: 'left', info: "Lafaz niat puasa Ramadan." },
+            { q: "Siapakah yang wajib berpuasa? 🧠", a: "Orang Gila", b: "Orang Berakal", correct: 'right', info: "Syarat wajib: Islam, Baligh, Berakal dan Sihat." },
+            { q: "Adakah budak kecil yang belum baligh wajib puasa? 👶", a: "Wajib", b: "Tidak Wajib", correct: 'right', info: "Kewajipan bermula apabila sudah Baligh." },
+            { q: "Muntah dengan sengaja membatalkan puasa? 🤮", a: "Batal", b: "Tidak Batal", correct: 'left', info: "Muntah dengan sengaja membatalkan puasa." },
+            { q: "Makan kerana TERLUPA, adakah batal puasa? 🍎", a: "Tidak Batal", b: "Ya, Batal", correct: 'left', info: "Terlupa tidak membatalkan puasa." },
+            { q: "Makan sebelum Subuh dipanggil? 🥛", a: "Iftar", b: "Sahur", correct: 'right', info: "Sahur adalah sunnah sebelum berpuasa." },
+            { q: "Membaca Al-Quran beramai-ramai dipanggil? 📚", a: "Tadarus", b: "Tazkirah", correct: 'left', info: "Tadarus diamalkan di bulan Ramadan." }
+        ];
+
         window.handleSheetResponse = function(data) {
+            console.log("Data diterima:", data);
             if (Array.isArray(data)) {
                 sheetData = data;
                 fetchError = false;
@@ -214,49 +186,30 @@
             if (oldScript) oldScript.remove();
         };
 
-        window.onload = () => { fetchSheetData(); renderUI(); };
-
-        function shuffleQuestions() {
-            questionBank = [...originalQuestionBank].sort(() => Math.random() - 0.5);
-        }
+        window.onload = () => { 
+            fetchSheetData(); 
+            renderUI(); 
+        };
 
         function fetchSheetData() {
             if (isFetching) return;
             isFetching = true;
             fetchError = false;
             renderUI();
+
             const script = document.createElement('script');
             const cacheBuster = Date.now();
             script.src = `${GOOGLE_SHEET_URL}?action=read&callback=handleSheetResponse&v=${cacheBuster}`;
             script.id = "jsonp-fetcher";
+            
             const timeout = setTimeout(() => {
-                if (isFetching) {
-                    isFetching = false; fetchError = true; renderUI();
-                    const oldScript = document.getElementById('jsonp-fetcher');
-                    if (oldScript) oldScript.remove();
-                }
-            }, 15000);
+                if (isFetching) { isFetching = false; fetchError = true; renderUI(); }
+            }, 10000);
+
             script.onerror = () => {
                 clearTimeout(timeout); isFetching = false; fetchError = true; renderUI();
             };
             document.body.appendChild(script);
-        }
-
-        async function handleAdminDelete(name, className) {
-            const inputPin = prompt(`ADMIN: Sila masukkan PIN untuk memadam rekod [${name}]:`);
-            if (inputPin === ADMIN_PIN) {
-                if (confirm(`Pasti mahu padam rekod ${name}?`)) {
-                    try {
-                        await fetch(GOOGLE_SHEET_URL, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            body: JSON.stringify({ action: "delete", name: name, class: className })
-                        });
-                        alert("Arahan padam dihantar.");
-                        setTimeout(fetchSheetData, 2000);
-                    } catch (e) { alert("Ralat padam."); }
-                }
-            } else if (inputPin !== null) { alert("PIN SALAH!"); }
         }
 
         function renderUI() {
@@ -289,40 +242,45 @@
                         <p class="text-[11px] text-emerald-800 font-bold leading-relaxed">
                             Arahan:<br>
                             1. Masukkan nama & kelas anda.<br>
-                            2. Jawab 20 soalan menggunakan kamera.<br>
-                            3. Tunjuk tangan kiri (Kiri) atau kanan (Kanan).
+                            2. Tunjuk tangan kiri atau kanan.<br>
+                            3. Pastikan tangan berada dalam kamera.
                         </p>
                     </div>
-                    <input id="in-name" type="text" placeholder="NAMA PENUH" oninput="this.value = this.value.toUpperCase()" class="w-full p-4 rounded-xl border-2 border-emerald-100 outline-none text-sm font-semibold uppercase focus:border-emerald-500 transition-colors">
-                    <input id="in-class" type="text" placeholder="KELAS" oninput="this.value = this.value.toUpperCase()" class="w-full p-4 rounded-xl border-2 border-emerald-100 outline-none text-sm font-semibold uppercase focus:border-emerald-500 transition-colors">
-                    <button id="btn-start" onclick="checkStart()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg uppercase tracking-widest hover:bg-emerald-700 active:scale-95 transition-all">Mula Kuiz 🏁</button>
+                    <input id="in-name" type="text" placeholder="NAMA PENUH" oninput="this.value = this.value.toUpperCase()" class="w-full p-4 rounded-xl border-2 border-emerald-100 outline-none text-sm font-semibold uppercase focus:border-emerald-500">
+                    <input id="in-class" type="text" placeholder="KELAS" oninput="this.value = this.value.toUpperCase()" class="w-full p-4 rounded-xl border-2 border-emerald-100 outline-none text-sm font-semibold uppercase focus:border-emerald-500">
+                    <button onclick="checkStart()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg uppercase tracking-widest hover:bg-emerald-700 active:scale-95 transition-all">Mula Kuiz 🏁</button>
                     <p id="err-msg" class="text-red-500 text-[10px] font-bold hidden bg-red-50 p-2 rounded border border-red-100 mt-2"></p>
                 </div>
             `;
         }
 
         function renderBoard() {
-            let list = (currentTab === 'winners') ? sheetData.filter(d => parseInt(d.score) === 20).slice(0, 100) : [...sheetData].reverse();
+            let list = (currentTab === 'winners') 
+                ? sheetData.filter(d => parseInt(d.score) >= 20) 
+                : [...sheetData].reverse();
+
             return `
                 <div class="text-left flex flex-col h-full">
                     <div class="flex justify-between items-center mb-2 border-b pb-1">
                         <h3 class="text-[10px] font-black uppercase text-emerald-800">${currentTab === 'winners' ? '🏅 Lencana 100' : '📋 Rekod Peserta'}</h3>
-                        <button onclick="fetchSheetData()" class="p-1 hover:bg-emerald-100 rounded-full">
+                        <button onclick="fetchSheetData()" class="p-1">
                             <svg class="w-3 h-3 text-emerald-600 ${isFetching?'spin':''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                         </button>
                     </div>
                     <div class="flex-1 overflow-y-auto custom-scroll space-y-2 pr-1">
-                        ${isFetching ? '<div class="text-center py-10 opacity-50 font-bold text-[10px] animate-pulse">Memuatkan data...</div>' : (fetchError ? '<div class="text-center py-10"><p class="text-red-500 font-bold text-[10px]">Ralat pangkalan data.</p></div>' : (list.length > 0 ? list.map(l => `
-                            <div ondblclick="handleAdminDelete('${l.name}', '${l.class}')" class="flex items-center justify-between bg-white p-2 rounded-lg border border-emerald-50 shadow-sm cursor-pointer">
+                        ${isFetching ? '<div class="text-center py-10 text-[10px] animate-pulse">Memuatkan...</div>' : 
+                          (fetchError ? '<div class="text-center py-10 text-red-500 font-bold text-[10px]">Ralat data! Sila refresh.</div>' : 
+                          (list.length > 0 ? list.map(l => `
+                            <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-emerald-50 shadow-sm">
                                 <div class="truncate flex-1">
-                                    <p class="text-[10px] font-bold text-emerald-900 truncate uppercase">${l.name}</p>
-                                    <p class="text-[8px] text-emerald-500 font-bold uppercase">${l.class}</p>
+                                    <p class="text-[10px] font-bold text-emerald-900 truncate uppercase">${l.name || 'Hamba Allah'}</p>
+                                    <p class="text-[8px] text-emerald-500 font-bold uppercase">${l.class || '-'}</p>
                                 </div>
-                                <span class="text-[10px] font-black ${l.score == 20 ? 'text-yellow-600 bg-yellow-50' : 'text-emerald-600 bg-emerald-50'} px-2 py-1 rounded border">${l.score}/20</span>
+                                <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded border">${l.score || 0}/20</span>
                             </div>
-                        `).join('') : '<div class="text-center py-10 opacity-50 font-bold text-[10px]">Tiada rekod.</div>'))}
+                        `).join('') : '<div class="text-center py-10 opacity-50 text-[10px]">Tiada rekod lagi.</div>'))}
                     </div>
                 </div>
             `;
@@ -330,58 +288,55 @@
 
         function switchTab(tab) { currentTab = tab; renderUI(); }
 
-        async function checkStart() {
+        function checkStart() {
             studentName = document.getElementById('in-name').value.trim().toUpperCase();
             studentClass = document.getElementById('in-class').value.trim().toUpperCase();
             if(!studentName || !studentClass) return;
-            if (sheetData.length > 0 && sheetData.some(d => d.name === studentName && d.class === studentClass)) {
-                const errEl = document.getElementById('err-msg');
-                errEl.innerText = "❌ REKOD SUDAH WUJUD!"; errEl.classList.remove('hidden'); return;
-            }
-            shuffleQuestions(); startQuizUI();
+            shuffleQuestions();
+            startQuizUI();
+        }
+
+        function shuffleQuestions() {
+            questionBank = [...originalQuestionBank].sort(() => Math.random() - 0.5);
         }
 
         function startQuizUI() {
             currentIdx = 0; score = 0;
             document.getElementById('app-root').innerHTML = `
-                <div id="quiz-ui" class="w-full h-full flex flex-col items-center justify-between py-6">
-                    <div class="glass-panel px-6 py-2 mt-2"><span id="q-count" class="font-bold text-emerald-700 text-sm">SOALAN 1/20</span></div>
-                    
-                    <div class="quiz-container-layout flex-1">
-                        <div class="options-side-container">
+                <div id="quiz-ui" class="w-full h-full flex flex-col items-center justify-center py-4 bg-emerald-950/20">
+                    <div class="quiz-container-layout">
+                        <div class="glass-panel px-4 py-2 flex justify-between items-center">
+                            <span id="q-count" class="font-bold text-emerald-800 text-xs">SOALAN 1</span>
+                            <span class="font-bold text-emerald-600 text-xs">SKOR: ${score}</span>
+                        </div>
+                        <div class="question-card glass-panel shadow-xl">
+                            <h2 id="q-text" class="text-lg font-bold leading-tight"></h2>
+                        </div>
+                        <div class="flex flex-col gap-4">
                             <div id="box-left" class="option-box glass-panel transition-all">
-                                <span class="option-label">Kiri</span>
-                                <p id="opt-a" class="option-text uppercase"></p>
+                                <span class="option-label">Pilihan Kiri</span>
+                                <p id="opt-a" class="option-text"></p>
                             </div>
-                        </div>
-
-                        <div class="question-card glass-panel shadow-lg">
-                            <h2 id="q-text" class="text-xl font-bold text-emerald-950 leading-tight"></h2>
-                        </div>
-
-                        <div class="options-side-container">
                             <div id="box-right" class="option-box glass-panel transition-all">
-                                <span class="option-label">Kanan</span>
-                                <p id="opt-b" class="option-text uppercase"></p>
+                                <span class="option-label">Pilihan Kanan</span>
+                                <p id="opt-b" class="option-text"></p>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="flex flex-col items-center w-full max-w-sm mb-10">
-                        <p class="text-[8px] font-bold text-white mb-3 uppercase tracking-[0.2em] bg-black/40 px-4 py-1.5 rounded-full">Tunjuk tangan KIRI atau KANAN untuk memilih</p>
-                        <div class="w-full bg-white/20 h-2.5 rounded-full border border-white/30 overflow-hidden shadow-inner mx-8">
-                            <div id="prog-bar" class="bg-yellow-400 h-full w-0 transition-all duration-100 shadow-[0_0_10px_#fbbf24]"></div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-full bg-black/30 h-2 rounded-full overflow-hidden mb-2">
+                                <div id="prog-bar" class="bg-yellow-400 h-full w-0 transition-all duration-100"></div>
+                            </div>
+                            <p class="text-[9px] font-bold text-white uppercase tracking-widest opacity-80">Tunjuk tangan untuk memilih</p>
                         </div>
                     </div>
-                    
                     <div id="feedback-modal" class="fixed inset-0 z-50 flex items-center justify-center p-6 hidden bg-black/80 backdrop-blur-md">
                         <div class="glass-panel p-8 max-w-sm w-full text-center shadow-2xl scale-in border-4 border-white">
                             <h2 id="fb-icon" class="text-7xl mb-4"></h2>
-                            <h3 id="fb-title" class="text-3xl font-black mb-3 uppercase italic"></h3>
-                            <div class="bg-emerald-50 p-5 rounded-2xl mb-8 border-2 border-emerald-100">
-                                <p id="fb-info" class="text-emerald-900 text-sm leading-relaxed font-bold"></p>
+                            <h3 id="fb-title" class="text-3xl font-black mb-3 uppercase italic text-emerald-900"></h3>
+                            <div class="bg-emerald-50 p-4 rounded-xl mb-6 border-2 border-emerald-100">
+                                <p id="fb-info" class="text-emerald-900 text-sm font-bold"></p>
                             </div>
-                            <button onclick="nextQuestion()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl uppercase shadow-xl hover:bg-emerald-700 active:scale-95 transition-all tracking-widest">Seterusnya ⏩</button>
+                            <button onclick="nextQuestion()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl uppercase shadow-xl hover:bg-emerald-700 active:scale-95 transition-all">Teruskan ⏩</button>
                         </div>
                     </div>
                 </div>
@@ -392,15 +347,13 @@
 
         function paparSoalan() {
             const data = questionBank[currentIdx];
-            document.getElementById('q-count').innerText = `SOALAN ${currentIdx + 1} DARI 20`;
+            document.getElementById('q-count').innerText = `SOALAN ${currentIdx + 1} / ${questionBank.length}`;
             document.getElementById('q-text').innerText = data.q;
             document.getElementById('opt-a').innerText = data.a;
             document.getElementById('opt-b').innerText = data.b;
             progress = 0; isChecking = false;
             document.getElementById('prog-bar').style.width = '0%';
             document.getElementById('feedback-modal').classList.add('hidden');
-            document.getElementById('box-left').className = "option-box glass-panel transition-all";
-            document.getElementById('box-right').className = "option-box glass-panel transition-all";
         }
 
         async function mulakanAI() {
@@ -417,14 +370,17 @@
                         const x = (1 - lm.x) * window.innerWidth; 
                         const y = lm.y * window.innerHeight;
                         cursor.style.left = x + 'px'; cursor.style.top = y + 'px';
+                        
                         const ratioX = 1 - lm.x;
                         if (ratioX < 0.4) selectedHand = 'left';
                         else if (ratioX > 0.6) selectedHand = 'right';
                         else selectedHand = 'none';
+
                         document.getElementById('box-left').classList.toggle('gemini-glow', selectedHand === 'left');
                         document.getElementById('box-right').classList.toggle('gemini-glow', selectedHand === 'right');
+
                         if (selectedHand !== 'none') {
-                            progress += 4; 
+                            progress += 5; 
                             document.getElementById('prog-bar').style.width = Math.min(progress, 100) + '%';
                             if (progress >= 100) semakJawapan();
                         } else { progress = 0; document.getElementById('prog-bar').style.width = '0%'; }
@@ -442,14 +398,14 @@
             const isCorrect = selectedHand === q.correct;
             if (isCorrect) score++;
             document.getElementById('fb-icon').innerText = isCorrect ? '🌟' : '💡';
-            document.getElementById('fb-title').innerText = isCorrect ? 'MANTAP!' : 'ALAMAK!';
+            document.getElementById('fb-title').innerText = isCorrect ? 'BETUL!' : 'SALAH!';
             document.getElementById('fb-info').innerText = q.info;
             document.getElementById('feedback-modal').classList.remove('hidden');
         }
 
         function nextQuestion() {
             currentIdx++;
-            if (currentIdx < 20) paparSoalan(); else tamatKuiz();
+            if (currentIdx < questionBank.length) paparSoalan(); else tamatKuiz();
         }
 
         async function tamatKuiz() {
@@ -460,15 +416,18 @@
                     mode: 'no-cors',
                     body: JSON.stringify({ action: "add", name: studentName, class: studentClass, score: score })
                 });
-                await new Promise(r => setTimeout(r, 2000));
-            } catch (e) { }
+            } catch (e) { console.error(e); }
+            
             document.getElementById('app-root').innerHTML = `
                 <div class="glass-panel p-8 text-center max-w-sm w-full scale-in">
-                    <h2 class="text-7xl mb-4">${score === 20 ? '🏆' : '✨'}</h2>
-                    <h3 class="text-2xl font-black text-emerald-900 uppercase">Tahniah!</h3>
-                    <p class="text-[10px] text-emerald-600 font-bold mb-2 uppercase tracking-widest">${studentName}</p>
-                    <p class="text-7xl font-black text-emerald-600 my-6 shadow-sm">${score}<span class="text-2xl text-emerald-300">/20</span></p>
-                    <button onclick="location.reload()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl uppercase shadow-lg tracking-widest active:scale-95 transition-all">Kembali Utama 🏠</button>
+                    <h2 class="text-7xl mb-4">${score === questionBank.length ? '🏆' : '✨'}</h2>
+                    <h3 class="text-2xl font-black text-emerald-900 uppercase">Tamat Kuiz!</h3>
+                    <p class="text-[10px] text-emerald-600 font-bold mb-4 uppercase tracking-widest">${studentName}</p>
+                    <div class="bg-emerald-50 p-6 rounded-2xl border-2 border-emerald-100 mb-6">
+                        <p class="text-sm font-bold text-emerald-800 mb-1 uppercase">Skor Anda:</p>
+                        <p class="text-6xl font-black text-emerald-600">${score}<span class="text-xl text-emerald-300">/${questionBank.length}</span></p>
+                    </div>
+                    <button onclick="location.reload()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl uppercase shadow-lg tracking-widest active:scale-95 transition-all">Ke Menu Utama 🏠</button>
                 </div>
             `;
         }
