@@ -89,16 +89,17 @@
             display: flex !important;
             flex-direction: row !important;
             width: 100%;
-            max-width: 500px;
+            max-width: 280px; /* Dikurangkan daripada 500px supaya muat skrin telefon */
             gap: 0.5rem;
-            padding: 0 0.5rem;
+            padding: 0 0.25rem;
             justify-content: center;
         }
 
         .option-box {
             flex: 1 !important;
-            min-height: 100px; /* Saiz lebih kecil untuk skrin telefon */
-            padding: 0.5rem !important;
+            max-width: 130px; /* Had lebar kotak supaya tidak terlalu panjang */
+            min-height: 85px; /* Saiz lebih kompak */
+            padding: 0.4rem !important;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -110,9 +111,10 @@
 
         /* Adjusting font sizes for small screens */
         @media (max-width: 480px) {
-            #q-text { font-size: 0.95rem; line-height: 1.2; }
-            #opt-a, #opt-b { font-size: 0.75rem; line-height: 1.1; }
-            .option-box { min-height: 90px; }
+            #q-text { font-size: 0.9rem; line-height: 1.2; }
+            #opt-a, #opt-b { font-size: 0.7rem; line-height: 1.1; }
+            .option-box { min-height: 80px; }
+            .options-container { max-width: 260px; }
         }
     </style>
 </head>
