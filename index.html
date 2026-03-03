@@ -3,451 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAMADAN HEAD</title>
+    <title>Kuiz Ramadan AI - PSS Al-Ghazali</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     
     <style>
-        :root {
-            --soft-pink: #fce4ec;
-            --main-pink: #f06292;
-            --dark-pink: #880e4f;
-            --cute-peach: #ffccbc;
-            --strawberry: #ff80ab;
-            --sky-blue: #b3e5fc;
-            --gold: #ffd700;
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+        
+        body { 
+            font-family: 'Fredoka', sans-serif; 
+            overflow: hidden; 
+            background: #064e3b; 
+            height: 100dvh; 
+            width: 100vw; 
+            margin: 0; 
+            touch-action: manipulation; 
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
-            background-color: var(--soft-pink);
-            background-image: radial-gradient(#f8bbd0 2px, transparent 2px);
-            background-size: 30px 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-            color: var(--dark-pink);
+        #ai-video { 
+            transform: scaleX(-1); 
+            object-fit: cover; 
+            width: 100%; 
+            height: 100%; 
+            position: absolute; 
+            z-index: 0; 
+            opacity: 0.3; 
         }
 
-        #game-wrapper {
-            width: 95%;
-            max-width: 500px;
-            height: 90vh;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 40px;
-            border: 8px solid var(--main-pink);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 15px 0 #f48fb1, 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.96); 
+            backdrop-filter: blur(10px); 
+            border: 3px solid #10b981; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
         }
 
-        #hud {
-            width: 100%;
-            padding: 12px 0;
-            display: flex;
-            justify-content: space-around;
-            background: var(--main-pink);
-            color: white;
-            font-size: 1.1rem;
-            font-weight: bold;
-            z-index: 20;
+        .hand-pointer { 
+            position: absolute; 
+            width: 32px; 
+            height: 32px; 
+            background: #fbbf24; 
+            border: 3px solid white; 
+            border-radius: 50%; 
+            pointer-events: none; 
+            z-index: 100; 
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.9); 
+            transition: transform 0.1s ease-out;
         }
 
-        #main-stage {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center;
-            width: 100%;
-            padding: 10px;
-            text-align: center;
-            gap: 15px;
+        .gemini-glow { 
+            border-color: #fbbf24 !important; 
+            background: #fffbeb !important; 
+            transform: scale(1.03); 
+            box-shadow: 0 0 20px #fbbf24; 
         }
 
-        .side-container {
-            display: flex;
-            width: 100%;
-            justify-content: space-around;
-            margin-bottom: 5px;
+        .tab-active { background-color: #10b981; color: white; }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+
+        .footer-text { 
+            font-size: 9px; 
+            letter-spacing: 1px; 
+            color: #d1fae5; 
+            position: fixed; 
+            bottom: 8px; 
+            z-index: 20; 
+            width: 100%; 
+            text-align: center; 
+            pointer-events: none; 
         }
-
-        .side-instruction {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            padding: 10px;
-            border-radius: 20px;
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
-
-        .side-instruction.active {
-            transform: scale(1.3);
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .arrow-box {
-            font-size: 2.5rem;
-            animation: floating 1.5s infinite ease-in-out;
-        }
-
-        @keyframes floating {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .instruction-text {
-            font-weight: bold;
-            font-size: 0.75rem;
-            padding: 6px 12px;
-            border-radius: 20px;
-            color: white;
-        }
-
-        .bg-strawberry { background-color: var(--strawberry); }
-        .bg-cyan { background-color: var(--sky-blue); color: var(--dark-pink); }
-
-        .center-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            width: 100%;
-        }
-
-        .character-box {
-            font-size: 70px; 
-            margin-bottom: 10px;
-            animation: heartBeat 2s infinite;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80px;
-        }
-
-        @keyframes heartBeat {
-            0%, 20%, 100% { transform: scale(1); }
-            10% { transform: scale(1.1); }
-        }
-
-        .question-card {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 30px;
-            border: 4px solid var(--soft-pink);
-            font-size: 1.15rem;
-            width: 85%;
-            min-height: 110px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1.4;
-            box-shadow: 0 10px 0 var(--soft-pink);
-            z-index: 5;
-        }
-
-        #video-container {
-            width: 140px;
-            height: 140px;
-            border: 5px solid var(--main-pink);
-            border-radius: 50%;
-            overflow: hidden;
-            background: #000;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 10;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
-        }
-
-        #feedback-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 8rem;
-            z-index: 200;
-            pointer-events: none;
-            text-shadow: 0 0 20px rgba(255,255,255,0.8);
-        }
-
-        .anim-pop { animation: popOut 1s forwards; }
-
-        @keyframes popOut {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
-        }
-
-        #overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--soft-pink);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .btn-cute {
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            background: var(--main-pink);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            box-shadow: 0 8px 0 var(--dark-pink);
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .btn-cute:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 var(--dark-pink);
-        }
-
-        #loading-spinner {
-            border: 8px solid white;
-            border-top: 8px solid var(--main-pink);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .scale-in { animation: scaleIn 0.3s ease-out forwards; }
     </style>
 </head>
 <body>
 
-    <div id="game-wrapper">
-        <div id="hud">
-            <div>Skor: <span id="score">0</span></div>
-            <div>Misi <span id="q-num">1</span>/10</div>
-        </div>
+    <video id="ai-video" playsinline muted autoplay></video>
+    <div id="cursor" class="hand-pointer" style="display:none"></div>
 
-        <div id="main-stage">
-            <div class="side-container">
-                <div id="guide-left" class="side-instruction">
-                    <div class="arrow-box">🕌</div>
-                    <div class="instruction-text bg-strawberry">TOLEH KIRI (TIDAK)</div>
-                </div>
-                <div id="guide-right" class="side-instruction">
-                    <div class="arrow-box">🌙</div>
-                    <div class="instruction-text bg-cyan">TOLEH KANAN (YA)</div>
-                </div>
-            </div>
-
-            <div class="center-content">
-                <div id="char" class="character-box">🕋</div>
-                <div id="question" class="question-card">Sila tunggu... ✨</div>
-                <div id="feedback-icon"></div>
-            </div>
-
-            <div id="video-container">
-                <video id="webcam" autoplay playsinline></video>
-            </div>
-        </div>
-
-        <div id="overlay">
-            <div id="loading-box">
-                <div id="loading-spinner"></div>
-                <p style="font-weight: bold; margin-top: 15px;">Membuka Ramadan Head... 🕌</p>
-            </div>
-            
-            <div id="start-box" style="display:none">
-                <div style="font-size: 5rem;">🕌</div>
-                <h1 style="font-size: 2.5rem; color: var(--dark-pink); margin: 0;">Ramadan Head 🌙</h1>
-                <p style="font-size: 1.1rem; color: var(--main-pink); margin-bottom: 20px;">Toleh kepala untuk menjawab!</p>
-                
-                <div style="background: white; padding: 20px; border-radius: 25px; margin-bottom: 25px; font-size: 1rem; box-shadow: 0 5px 0 var(--soft-pink); width: 100%;">
-                    <p style="margin: 10px 0;">🕌 <b>TOLEH KIRI</b> = TIDAK / SALAH</p>
-                    <p style="margin: 10px 0;">🌙 <b>TOLEH KANAN</b> = YA / BETUL</p>
-                </div>
-
-                <button id="start-btn" class="btn-cute">MULA MAIN! 🕋</button>
-            </div>
-
-            <div id="end-box" style="display:none">
-                <div style="font-size: 4rem;">🤲</div>
-                <h1 style="font-size: 2.5rem; color: var(--dark-pink);">ALHAMDULILLAH!</h1>
-                <p id="final-msg" style="font-size: 1.8rem; color: var(--main-pink); margin-bottom: 25px;"></p>
-                <button id="replay-btn" class="btn-cute">MAIN LAGI 📿</button>
-            </div>
+    <div id="app-root" class="relative z-10 h-screen w-screen flex flex-col items-center justify-center p-4">
+        <div class="glass-panel p-8 text-center">
+            <h2 class="text-lg font-bold text-emerald-800 animate-pulse uppercase">🌙 Memulakan Kuiz...</h2>
         </div>
     </div>
 
-    <script type="module">
-        import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+    <div class="footer-text font-bold uppercase">ARC | SK BANDAR TUN HUSSEIN ONN 2 | 2026</div>
 
-        let faceLandmarker;
-        const video = document.getElementById("webcam");
-        let score = 0, currentQ = 0, canAnswer = false;
-        let shuffledQuestions = [];
-        
-        const questionsBase = [
-            { q: "Niat puasa wajib dilakukan pada waktu malam sebelum masuk waktu Subuh.", a: "ya", e: "🌙" },
-            { q: "Makan tanpa sengaja kerana terlupa membatalkan puasa.", a: "tidak", e: "🍲" },
-            { q: "Hukum puasa Ramadan adalah Wajib bagi umat Islam yang mampu.", a: "ya", e: "📜" },
-            { q: "Muntah dengan sengaja akan menyebabkan puasa seseorang terbatal.", a: "ya", e: "🤮" },
-            { q: "Kanak-kanak yang belum baligh diwajibkan oleh syarak untuk berpuasa penuh.", a: "tidak", e: "🧒" },
-            { q: "Mencaci maki orang lain boleh mengurangkan pahala puasa seseorang.", a: "ya", e: "🤬" },
-            { q: "Berus gigi sehingga tertelan air dengan sengaja membatalkan puasa.", a: "ya", e: "🪥" },
-            { q: "Tidur sepanjang hari secara automatik membatalkan puasa.", a: "tidak", e: "😴" },
-            { q: "Memasukkan sesuatu ke dalam rongga terbuka dengan sengaja membatalkan puasa.", a: "ya", e: "📥" },
-            { q: "Adakah berbuka puasa dengan makanan yang haram dibenarkan?", a: "tidak", e: "🚫" }
+    <script>
+        const GOOGLE_SHEET_URL = "https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxdI-oy3uKF-ym0Ken7mkTAcOFjrDY_JLKhmUdUQTGk-jw-GCiPAyMTSWI8aR7j51zbiQ/exec"; 
+        const ADMIN_PIN = "4055";
+
+        const originalQuestionBank = [
+            { q: "1️⃣ Puasa dari segi bahasa bermaksud? 🛑", a: "Menahan diri", b: "Makan perlahan", correct: 'left', info: "Bahasa: Menahan diri." },
+            { q: "1️⃣ Bilakah waktu tamat puasa setiap hari? 🌅", a: "Zohor", b: "Maghrib", correct: 'right', info: "Tamat puasa apabila matahari terbenam (Maghrib)." },
+            { q: "2️⃣ Niat puasa perlu dibuat pada waktu? 🌙", a: "Tengah hari", b: "Malam", correct: 'right', info: "Niat dilakukan pada waktu malam sebelum Subuh." },
+            { q: "2️⃣ Sahaja aku berpuasa esok hari... Ini lafaz? 🗣️", a: "Niat Puasa", b: "Doa Makan", correct: 'left', info: "Itu adalah sebahagian daripada lafaz niat puasa Ramadan." },
+            { q: "3️⃣ Siapakah yang wajib berpuasa? 🧠", a: "Orang Gila", b: "Orang Berakal", correct: 'right', info: "Syarat wajib: Islam, Baligh, Berakal dan Sihat." },
+            { q: "3️⃣ Adakah budak kecil yang belum baligh wajib puasa? 👶", a: "Wajib", b: "Tidak Wajib", correct: 'right', info: "Kewajipan bermula apabila seseorang itu sudah Baligh." },
+            { q: "4️⃣ Adakah muntah dengan sengaja membatalkan puasa? 🤮", a: "Batal", b: "Tidak Batal", correct: 'left', info: "Muntah dengan sengaja membatalkan puasa." },
+            { q: "4️⃣ Makan kerana TERLUPA, adakah batal puasa? 🍎", a: "Tidak Batal", b: "Ya, Batal", correct: 'left', info: "Makan secara tidak sengaja atau terlupa tidak membatalkan puasa." },
+            { q: "5️⃣ Makan sebelum Subuh dipanggil? 🥛", a: "Iftar", b: "Sahur", correct: 'right', info: "Bersahur adalah sunnah walaupun hanya minum sedikit air." },
+            { q: "5️⃣ Membaca Al-Quran beramai-ramai dipanggil? 📚", a: "Tadarus", b: "Tazkirah", correct: 'left', info: "Tadarus Al-Quran adalah amalan sunnah di bulan Ramadan." },
+            { q: "6️⃣ Malam yang lebih baik dari 1000 bulan? 💎", a: "Lailatul Qadar", b: "Malam Raya", correct: 'left', info: "Malam Lailatul Qadar adalah malam paling istimewa." },
+            { q: "6️⃣ Apakah yang berlaku kepada syaitan di bulan Ramadan? ⛓️", a: "Dilepaskan", b: "Dibelenggu", correct: 'right', info: "Pintu neraka ditutup dan syaitan dibelenggu." },
+            { q: "7️⃣ Perintah puasa diturunkan pada tahun berapa Hijrah? 📜", a: "Tahun ke-5", b: "Tahun ke-2", correct: 'right', info: "Kewajipan puasa bermula pada tahun ke-2 Hijrah." },
+            { q: "7️⃣ Di manakah tempat Al-Quran mula diturunkan? ⛰️", a: "Gua Hira'", b: "Gua Ashabul Kahfi", correct: 'left', info: "Al-Quran mula diturunkan kepada Nabi Muhammad SAW di Gua Hira'." },
+            { q: "8️⃣ Tidur berlebihan sepanjang hari hukumnya? 😴", a: "Wajib", b: "Makruh", correct: 'right', info: "Tidur berlebihan menghilangkan keberkatan dan hukumnya makruh." },
+            { q: "8️⃣ Apakah hukum mengumpat ketika berpuasa? 🙊", a: "Makruh", b: "Harus", correct: 'left', info: "Bercakap buruk atau mengumpat mengurangkan pahala puasa." },
+            { q: "9️⃣ Orang yang berjalan jauh (81km+) dipanggil? 🚗", a: "Musafir", b: "Mukim", correct: 'left', info: "Musafir diberi keringanan untuk tidak berpuasa tetapi perlu Qada'." },
+            { q: "9️⃣ Adakah orang tua yang sangat uzur wajib puasa? 👴", a: "Wajib", b: "Boleh Berbuka", correct: 'right', info: "Orang tua uzur boleh berbuka tetapi perlu membayar fidyah." },
+            { q: "10️⃣ Bilakah tarikh Nuzul Al-Quran diraikan? 📖", a: "17 Ramadan", b: "10 Ramadan", correct: 'left', info: "Nuzul Al-Quran berlaku pada 17 Ramadan." },
+            { q: "10️⃣ Al-Quran diturunkan kepada Nabi siapa? 🕊️", a: "Nabi Isa AS", b: "Nabi Muhammad SAW", correct: 'right', info: "Al-Quran diturunkan kepada Nabi terakhir, Muhammad SAW." }
         ];
 
-        async function initAI() {
-            try {
-                const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
-                faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-                    baseOptions: { 
-                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, 
-                        delegate: "CPU"
-                    },
-                    outputFaceBlendshapes: true, 
-                    runningMode: "VIDEO", 
-                    numFaces: 1
-                });
-                document.getElementById("loading-box").style.display = "none";
-                document.getElementById("start-box").style.display = "block";
-            } catch (e) {
-                document.getElementById("loading-box").innerText = "Gagal memuatkan AI. Sila muat semula.";
-            }
+        let questionBank = [];
+        let currentIdx = 0, score = 0, progress = 0, selectedHand = 'none';
+        let studentName = "", studentClass = "", isChecking = false, currentTab = 'register';
+        let sheetData = [];
+
+        window.onload = () => { fetchSheetData(); renderUI(); };
+
+        function shuffleQuestions() {
+            questionBank = [...originalQuestionBank].sort(() => Math.random() - 0.5);
         }
 
-        // Fungsi untuk rawak soalan
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
+        async function fetchSheetData() {
+            if (!GOOGLE_SHEET_URL.includes("http")) return;
+            try {
+                const res = await fetch(GOOGLE_SHEET_URL);
+                const json = await res.json();
+                sheetData = json;
+                if (currentTab !== 'register') renderUI();
+            } catch (e) { console.log("Gagal mengambil data Leaderboard"); }
         }
 
-        async function startGame() {
-            try {
-                if (!video.srcObject) {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                    video.srcObject = stream;
+        async function handleAdminDelete(name, className) {
+            const inputPin = prompt(`ADMIN: Sila masukkan PIN untuk memadam rekod [${name}] dari kelas [${className}]:`);
+            if (inputPin === ADMIN_PIN) {
+                const confirmDelete = confirm(`Adakah anda pasti mahu memadam rekod ini?`);
+                if (confirmDelete) {
+                    try {
+                        // Sediakan UI loading
+                        document.getElementById('tab-content').innerHTML = `<div class="flex-1 flex items-center justify-center font-bold text-emerald-800 text-[10px] animate-pulse">MEMADAM REKOD...</div>`;
+                        
+                        await fetch(GOOGLE_SHEET_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            cache: 'no-cache',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: "delete", name: name, class: className })
+                        });
+                        
+                        // Beri sedikit masa untuk DB kemaskini sebelum fetch semula
+                        setTimeout(async () => {
+                            await fetchSheetData();
+                            renderUI();
+                        }, 2000);
+                    } catch (e) {
+                        alert("Gagal memadam rekod. Sila cuba lagi.");
+                        renderUI();
+                    }
                 }
-                document.getElementById("overlay").style.display = "none";
-                
-                // Rawak soalan sebelum mula
-                shuffledQuestions = shuffle([...questionsBase]);
-                
-                video.onloadedmetadata = () => { predict(); resetGameState(); };
-                if (video.readyState >= 2) { resetGameState(); }
-            } catch (err) {
-                alert("Sila benarkan akses kamera.");
+            } else if (inputPin !== null) {
+                alert("PIN SALAH!");
             }
         }
 
-        function resetGameState() {
-            score = 0;
-            currentQ = 0;
-            document.getElementById("score").innerText = "0";
-            document.getElementById("end-box").style.display = "none";
-            loadQuestion();
+        function renderUI() {
+            const root = document.getElementById('app-root');
+            root.innerHTML = `
+                <div class="glass-panel p-6 text-center max-w-sm w-full shadow-2xl flex flex-col min-h-[520px] max-h-[90vh] scale-in">
+                    <div class="mb-4">
+                        <h1 class="text-2xl font-bold text-emerald-900 uppercase leading-tight">🌙 Kuiz Ramadan AI</h1>
+                        <p class="text-emerald-600 font-bold text-[10px] tracking-[0.2em] uppercase">PSS AL-GHAZALI</p>
+                    </div>
+                    
+                    <div class="flex bg-emerald-100 p-1 rounded-xl mb-4 text-[9px] font-bold">
+                        <button onclick="switchTab('register')" class="flex-1 py-2 rounded-lg ${currentTab==='register'?'tab-active':''}">DAFTAR</button>
+                        <button onclick="switchTab('winners')" class="flex-1 py-2 rounded-lg ${currentTab==='winners'?'tab-active':''}">LENCANA 100</button>
+                        <button onclick="switchTab('all')" class="flex-1 py-2 rounded-lg ${currentTab==='all'?'tab-active':''}">LEADERBOARD</button>
+                    </div>
+
+                    <div id="tab-content" class="flex-1 overflow-hidden flex flex-col">
+                        ${currentTab === 'register' ? renderRegister() : renderBoard()}
+                    </div>
+                </div>
+            `;
         }
 
-        function loadQuestion() {
-            if(currentQ >= shuffledQuestions.length) { endGame(); return; }
-            
-            const item = shuffledQuestions[currentQ];
-            document.getElementById("question").innerText = item.q;
-            document.getElementById("q-num").innerText = currentQ + 1;
-            document.getElementById("char").innerText = item.e;
-            
-            canAnswer = false;
-            setTimeout(() => { canAnswer = true; }, 2000);
+        function renderRegister() {
+            return `
+                <div class="flex flex-col justify-center h-full space-y-4">
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mb-2 shadow-sm text-left">
+                        <p class="text-[11px] text-emerald-800 font-bold leading-relaxed">
+                            Arahan:<br>
+                            1. Masukkan nama & kelas anda.<br>
+                            2. Jawab 20 soalan menggunakan kamera.<br>
+                            3. Tunjuk tangan kiri (Kiri) atau kanan (Kanan).
+                        </p>
+                    </div>
+                    <input id="in-name" type="text" placeholder="NAMA PENUH" oninput="this.value = this.value.toUpperCase()" class="w-full p-4 rounded-xl border-2 border-emerald-100 outline-none text-sm font-semibold uppercase focus:border-emerald-500 transition-colors">
+                    <input id="in-class" type="text" placeholder="KELAS" oninput="this.value = this.value.toUpperCase()" class="w-full p-4 rounded-xl border-2 border-emerald-100 outline-none text-sm font-semibold uppercase focus:border-emerald-500 transition-colors">
+                    <button id="btn-start" onclick="checkStart()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg uppercase tracking-widest hover:bg-emerald-700 active:scale-95 transition-all">Mula Kuiz 🏁</button>
+                    <p id="err-msg" class="text-red-500 text-[10px] font-bold hidden bg-red-50 p-2 rounded border border-red-100 mt-2"></p>
+                </div>
+            `;
         }
 
-        function checkAnswer(userChoice) {
-            if(!canAnswer) return;
-            canAnswer = false;
-            const correct = shuffledQuestions[currentQ].a;
-            const feedbackIcon = document.getElementById("feedback-icon");
-            
-            if(userChoice === correct) {
-                score += 10;
-                document.getElementById("score").innerText = score;
-                feedbackIcon.innerText = "✨";
-                feedbackIcon.style.color = "#4caf50";
-            } else { 
-                feedbackIcon.innerText = "❌"; 
-                feedbackIcon.style.color = "#f44336";
+        function renderBoard() {
+            let list = [];
+            if (currentTab === 'winners') {
+                list = sheetData.filter(d => parseInt(d.score) === 20).slice(0, 100);
+            } else {
+                list = [...sheetData].reverse();
             }
-            
-            feedbackIcon.classList.remove("anim-pop");
-            void feedbackIcon.offsetWidth; 
-            feedbackIcon.classList.add("anim-pop");
-            
-            currentQ++;
-            setTimeout(loadQuestion, 2800);
+
+            return `
+                <div class="text-left flex flex-col h-full">
+                    <h3 class="text-[10px] font-black uppercase mb-2 text-emerald-800 border-b pb-1">
+                        ${currentTab === 'winners' ? '🏅 Lencana 100 (Skor 20/20)' : '📋 Rekod Peserta'}
+                    </h3>
+                    <p class="text-[7px] text-gray-400 mb-2 italic">* Admin: Klik 2x nama untuk padam.</p>
+                    <div class="flex-1 overflow-y-auto custom-scroll space-y-2 pr-1">
+                        ${list.length > 0 ? list.map((l, i) => `
+                            <div ondblclick="handleAdminDelete('${l.name}', '${l.class}')" class="flex items-center justify-between bg-white p-2 rounded-lg border border-emerald-50 shadow-sm cursor-pointer select-none">
+                                <div class="truncate flex-1">
+                                    <p class="text-[10px] font-bold text-emerald-900 truncate uppercase mb-1">${currentTab==='winners'?i+1+'. ':''}${l.name}</p>
+                                    <p class="text-[8px] text-emerald-500 font-bold uppercase">${l.class}</p>
+                                </div>
+                                <span class="text-[10px] font-black ${l.score == 20 ? 'text-yellow-600 bg-yellow-50 border-yellow-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200'} px-2 py-1 rounded-md border">${l.score}/20</span>
+                            </div>
+                        `).join('') : '<div class="text-center py-10 opacity-50 font-bold text-[10px]">Tiada rekod setakat ini.</div>'}
+                    </div>
+                </div>
+            `;
         }
 
-        function endGame() {
-            document.getElementById("overlay").style.display = "flex";
-            document.getElementById("start-box").style.display = "none";
-            document.getElementById("end-box").style.display = "block";
-            document.getElementById("final-msg").innerText = `Skor Akhir: ${score}/100`;
-        }
+        function switchTab(tab) { currentTab = tab; renderUI(); }
 
-        function predict() {
-            if (document.getElementById("overlay").style.display !== "none") {
-                requestAnimationFrame(predict);
+        async function checkStart() {
+            studentName = document.getElementById('in-name').value.trim().toUpperCase();
+            studentClass = document.getElementById('in-class').value.trim().toUpperCase();
+            const errEl = document.getElementById('err-msg');
+            const btn = document.getElementById('btn-start');
+            
+            if(!studentName || !studentClass) return;
+
+            const isDup = sheetData.some(d => d.name.toUpperCase() === studentName && d.class.toUpperCase() === studentClass);
+            if(isDup) {
+                errEl.innerText = "❌ REKOD SUDAH WUJUD! ANDA HANYA BOLEH MENJAWAB SEKALI SAHAJA.";
+                errEl.classList.remove('hidden');
                 return;
             }
 
-            const results = faceLandmarker.detectForVideo(video, performance.now());
-            if (results.faceLandmarks?.length > 0) {
-                const nose = results.faceLandmarks[0][1];
-                const leftFace = results.faceLandmarks[0][234];
-                const rightFace = results.faceLandmarks[0][454];
-                
-                const rawNosePos = (nose.x - leftFace.x) / (rightFace.x - leftFace.x);
-
-                if (rawNosePos > 0.62) { 
-                    document.getElementById("guide-right").classList.add("active");
-                    document.getElementById("guide-left").classList.remove("active");
-                    if(canAnswer) checkAnswer("ya");
-                } 
-                else if (rawNosePos < 0.38) { 
-                    document.getElementById("guide-left").classList.add("active");
-                    document.getElementById("guide-right").classList.remove("active");
-                    if(canAnswer) checkAnswer("tidak");
-                } 
-                else {
-                    document.getElementById("guide-left").classList.remove("active");
-                    document.getElementById("guide-right").classList.remove("active");
-                }
-            }
-            requestAnimationFrame(predict);
+            btn.disabled = true; btn.innerText = "SEDANG MEMUAT...";
+            shuffleQuestions(); 
+            setTimeout(startQuizUI, 800);
         }
 
-        window.addEventListener('load', initAI);
-        document.getElementById("start-btn").addEventListener("click", startGame);
-        document.getElementById("replay-btn").addEventListener("click", startGame);
+        function startQuizUI() {
+            currentIdx = 0; score = 0;
+            document.getElementById('app-root').innerHTML = `
+                <div id="quiz-ui" class="w-full h-full flex flex-col items-center justify-between py-6 px-4">
+                    <div class="glass-panel px-5 py-2"><span id="q-count" class="font-bold text-emerald-700 text-sm">SOALAN 1/20</span></div>
+                    
+                    <div class="glass-panel p-6 w-full max-w-md text-center min-h-[140px] flex items-center justify-center border-emerald-200 shadow-lg">
+                        <h2 id="q-text" class="text-lg sm:text-xl font-bold text-emerald-950 leading-tight"></h2>
+                    </div>
+
+                    <!-- Layout sentiasa bersebelahan (flex-row) walaupun di telefon -->
+                    <div class="flex flex-row gap-3 w-full max-w-lg items-stretch">
+                        <div id="box-left" class="option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]">
+                            <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full mb-2 uppercase">KIRI</span>
+                            <p id="opt-a" class="font-bold text-emerald-900 text-xs sm:text-sm uppercase leading-tight"></p>
+                        </div>
+                        <div id="box-right" class="option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]">
+                            <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full mb-2 uppercase">KANAN</span>
+                            <p id="opt-b" class="font-bold text-emerald-900 text-xs sm:text-sm uppercase leading-tight"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center w-full max-w-xs">
+                        <p class="text-[9px] font-bold text-white mb-2 uppercase tracking-widest bg-black/30 px-4 py-1.5 rounded-full text-center">Tunjuk tangan kiri/kanan pada kamera</p>
+                        <div class="w-full bg-white/30 h-3 rounded-full border border-white/50 overflow-hidden">
+                            <div id="prog-bar" class="bg-yellow-400 h-full w-0 transition-all duration-100"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="feedback-modal" class="fixed inset-0 z-50 flex items-center justify-center p-6 hidden bg-black/75 backdrop-blur-md">
+                        <div class="glass-panel p-7 max-w-sm w-full text-center shadow-2xl scale-in">
+                            <h2 id="fb-icon" class="text-7xl mb-4"></h2>
+                            <h3 id="fb-title" class="text-3xl font-bold mb-2 uppercase"></h3>
+                            <div class="bg-emerald-50 p-5 rounded-2xl mb-6 border border-emerald-100">
+                                <p id="fb-info" class="text-emerald-900 text-base leading-relaxed font-semibold"></p>
+                            </div>
+                            <button onclick="nextQuestion()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl uppercase tracking-widest shadow-lg active:scale-95 transition-transform">Seterusnya ⏩</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            paparSoalan();
+            mulakanAI();
+        }
+
+        function paparSoalan() {
+            const data = questionBank[currentIdx];
+            document.getElementById('q-count').innerText = `SOALAN ${currentIdx + 1} DARI 20`;
+            document.getElementById('q-text').innerText = data.q;
+            document.getElementById('opt-a').innerText = data.a;
+            document.getElementById('opt-b').innerText = data.b;
+            progress = 0; isChecking = false;
+            document.getElementById('prog-bar').style.width = '0%';
+            document.getElementById('feedback-modal').classList.add('hidden');
+            
+            document.getElementById('box-left').className = "option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]";
+            document.getElementById('box-right').className = "option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]";
+        }
+
+        async function mulakanAI() {
+            const video = document.getElementById('ai-video');
+            const cursor = document.getElementById('cursor');
+            try {
+                const hands = new window.Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+                hands.setOptions({ 
+                    maxNumHands: 1, 
+                    modelComplexity: 1, 
+                    minDetectionConfidence: 0.65 
+                });
+
+                hands.onResults(results => {
+                    if (isChecking) return;
+                    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                        cursor.style.display = 'block';
+                        const lm = results.multiHandLandmarks[0][8]; 
+                        const x = (1 - lm.x) * window.innerWidth; 
+                        const y = lm.y * window.innerHeight;
+                        cursor.style.left = x + 'px'; 
+                        cursor.style.top = y + 'px';
+                        
+                        const ratioX = 1 - lm.x;
+                        if (ratioX < 0.45) selectedHand = 'left';
+                        else if (ratioX > 0.55) selectedHand = 'right';
+                        else selectedHand = 'none';
+                        
+                        const bl = document.getElementById('box-left');
+                        const br = document.getElementById('box-right');
+                        if(bl) bl.classList.toggle('gemini-glow', selectedHand === 'left');
+                        if(br) br.classList.toggle('gemini-glow', selectedHand === 'right');
+
+                        if (selectedHand !== 'none') {
+                            progress += 4; 
+                            document.getElementById('prog-bar').style.width = Math.min(progress, 100) + '%';
+                            if (progress >= 100) semakJawapan();
+                        } else { 
+                            progress = 0; 
+                            if(document.getElementById('prog-bar')) document.getElementById('prog-bar').style.width = '0%'; 
+                        }
+                    } else { 
+                        cursor.style.display = 'none'; 
+                        selectedHand = 'none'; 
+                    }
+                });
+
+                const camera = new window.Camera(video, { 
+                    onFrame: async () => { await hands.send({image: video}); }, 
+                    width: 640, height: 480 
+                });
+                camera.start();
+            } catch (err) { console.error("AI Error:", err); }
+        }
+
+        function semakJawapan() {
+            if (isChecking) return;
+            isChecking = true;
+            const q = questionBank[currentIdx];
+            const isCorrect = selectedHand === q.correct;
+            if (isCorrect) score++;
+            
+            document.getElementById('fb-icon').innerText = isCorrect ? '🤩' : '🥺';
+            document.getElementById('fb-title').innerText = isCorrect ? 'BETUL!' : 'SALAH!';
+            document.getElementById('fb-info').innerText = q.info;
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < 20) paparSoalan();
+            else tamatKuiz();
+        }
+
+        async function tamatKuiz() {
+            document.getElementById('app-root').innerHTML = `
+                <div class="glass-panel p-8 text-center max-w-sm w-full shadow-2xl">
+                    <p class="animate-pulse font-bold text-emerald-800 uppercase">Menyimpan markah anda... ⏳</p>
+                </div>
+            `;
+
+            if (GOOGLE_SHEET_URL.includes("http")) {
+                try {
+                    await fetch(GOOGLE_SHEET_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: "add", name: studentName, class: studentClass, score: score })
+                    });
+                } catch (e) { console.log("Gagal menghantar data"); }
+            }
+
+            document.getElementById('app-root').innerHTML = `
+                <div class="glass-panel p-8 text-center max-w-sm w-full shadow-2xl scale-in">
+                    <h2 class="text-7xl mb-4">${score === 20 ? '👑' : (score >= 15 ? '⭐' : '💪')}</h2>
+                    <h3 class="text-2xl font-bold uppercase tracking-widest text-emerald-900">Kuiz Selesai!</h3>
+                    <div class="my-6">
+                        <p class="text-[11px] text-emerald-600 font-bold uppercase mb-1">Markah:</p>
+                        <p class="text-7xl font-black text-emerald-600">${score}/20</p>
+                    </div>
+                    <p class="text-[12px] text-gray-500 mb-6 italic px-4 leading-relaxed font-bold">
+                        ${score === 20 ? 'Tahniah! Nama anda layak masuk ke Lencana 100.' : 'Hebat! Anda telah menyelesaikan cabaran 20 soalan Ramadan.'}
+                    </p>
+                    <button onclick="location.reload()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg uppercase tracking-widest active:scale-95 transition-all">Halaman Utama 🏠</button>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
