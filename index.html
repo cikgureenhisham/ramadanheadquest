@@ -83,6 +83,24 @@
             to { transform: scale(1); opacity: 1; }
         }
         .scale-in { animation: scaleIn 0.3s ease-out forwards; }
+
+        /* Memastikan susunan pilihan jawapan sentiasa baris (row) */
+        .options-container {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100%;
+            gap: 0.75rem;
+            padding: 0 1rem;
+        }
+
+        .option-box {
+            flex: 1 !important;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -152,7 +170,6 @@
                 const confirmDelete = confirm(`Adakah anda pasti mahu memadam rekod ini?`);
                 if (confirmDelete) {
                     try {
-                        // Sediakan UI loading
                         document.getElementById('tab-content').innerHTML = `<div class="flex-1 flex items-center justify-center font-bold text-emerald-800 text-[10px] animate-pulse">MEMADAM REKOD...</div>`;
                         
                         await fetch(GOOGLE_SHEET_URL, {
@@ -163,7 +180,6 @@
                             body: JSON.stringify({ action: "delete", name: name, class: className })
                         });
                         
-                        // Beri sedikit masa untuk DB kemaskini sebelum fetch semula
                         setTimeout(async () => {
                             await fetchSheetData();
                             renderUI();
@@ -280,15 +296,15 @@
                         <h2 id="q-text" class="text-lg sm:text-xl font-bold text-emerald-950 leading-tight"></h2>
                     </div>
 
-                    <!-- Layout sentiasa bersebelahan (flex-row) walaupun di telefon -->
-                    <div class="flex flex-row gap-3 w-full max-w-lg items-stretch">
-                        <div id="box-left" class="option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]">
+                    <!-- Layout sentiasa kiri & kanan (row) walaupun di telefon -->
+                    <div class="options-container">
+                        <div id="box-left" class="option-box glass-panel border-4 transition-all">
                             <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full mb-2 uppercase">KIRI</span>
-                            <p id="opt-a" class="font-bold text-emerald-900 text-xs sm:text-sm uppercase leading-tight"></p>
+                            <p id="opt-a" class="font-bold text-emerald-900 text-xs sm:text-sm uppercase leading-tight px-2"></p>
                         </div>
-                        <div id="box-right" class="option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]">
+                        <div id="box-right" class="option-box glass-panel border-4 transition-all">
                             <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full mb-2 uppercase">KANAN</span>
-                            <p id="opt-b" class="font-bold text-emerald-900 text-xs sm:text-sm uppercase leading-tight"></p>
+                            <p id="opt-b" class="font-bold text-emerald-900 text-xs sm:text-sm uppercase leading-tight px-2"></p>
                         </div>
                     </div>
 
@@ -325,8 +341,8 @@
             document.getElementById('prog-bar').style.width = '0%';
             document.getElementById('feedback-modal').classList.add('hidden');
             
-            document.getElementById('box-left').className = "option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]";
-            document.getElementById('box-right').className = "option-box glass-panel flex-1 p-4 text-center border-4 transition-all flex flex-col items-center justify-center min-h-[110px]";
+            document.getElementById('box-left').className = "option-box glass-panel border-4 transition-all";
+            document.getElementById('box-right').className = "option-box glass-panel border-4 transition-all";
         }
 
         async function mulakanAI() {
