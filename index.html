@@ -84,37 +84,38 @@
         }
         .scale-in { animation: scaleIn 0.3s ease-out forwards; }
 
-        /* Mobile Optimization: Force Horizontal Layout */
+        /* Mobile Optimization: Super Compact Horizontal Layout */
         .options-container {
             display: flex !important;
             flex-direction: row !important;
             width: 100%;
-            max-width: 280px; /* Dikurangkan daripada 500px supaya muat skrin telefon */
-            gap: 0.5rem;
-            padding: 0 0.25rem;
+            max-width: 220px; /* Lebar keseluruhan dikurangkan lagi */
+            gap: 0.4rem;
+            padding: 0 0.2rem;
             justify-content: center;
         }
 
         .option-box {
             flex: 1 !important;
-            max-width: 130px; /* Had lebar kotak supaya tidak terlalu panjang */
-            min-height: 85px; /* Saiz lebih kompak */
-            padding: 0.4rem !important;
+            max-width: 100px; /* Maksimum lebar kotak kini lebih kecil */
+            min-height: 70px; /* Ketinggian lebih rendah */
+            padding: 0.3rem !important;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            border-radius: 1rem !important;
+            border-radius: 0.8rem !important;
             border-width: 2px !important;
         }
 
         /* Adjusting font sizes for small screens */
         @media (max-width: 480px) {
-            #q-text { font-size: 0.9rem; line-height: 1.2; }
-            #opt-a, #opt-b { font-size: 0.7rem; line-height: 1.1; }
-            .option-box { min-height: 80px; }
-            .options-container { max-width: 260px; }
+            #q-text { font-size: 0.85rem; line-height: 1.2; }
+            #opt-a, #opt-b { font-size: 0.65rem; line-height: 1.1; }
+            .option-box { min-height: 65px; }
+            .options-container { max-width: 200px; }
+            .option-box span { font-size: 7px; padding: 1px 4px; }
         }
     </style>
 </head>
@@ -311,20 +312,19 @@
                         <h2 id="q-text" class="font-bold text-emerald-950 leading-tight"></h2>
                     </div>
 
-                    <!-- Layout sentiasa kiri & kanan (row) -->
                     <div class="options-container">
                         <div id="box-left" class="option-box glass-panel border-4 transition-all">
-                            <span class="text-[8px] font-black bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full mb-1 uppercase">KIRI</span>
+                            <span class="text-[7px] font-black bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full mb-1 uppercase">KIRI</span>
                             <p id="opt-a" class="font-bold text-emerald-900 uppercase leading-tight"></p>
                         </div>
                         <div id="box-right" class="option-box glass-panel border-4 transition-all">
-                            <span class="text-[8px] font-black bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full mb-1 uppercase">KANAN</span>
+                            <span class="text-[7px] font-black bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full mb-1 uppercase">KANAN</span>
                             <p id="opt-b" class="font-bold text-emerald-900 uppercase leading-tight"></p>
                         </div>
                     </div>
 
                     <div class="flex flex-col items-center w-full max-w-xs">
-                        <p class="text-[8px] font-bold text-white mb-2 uppercase tracking-widest bg-black/30 px-3 py-1 rounded-full text-center">Tunjuk tangan kiri/kanan pada kamera</p>
+                        <p class="text-[7px] font-bold text-white mb-2 uppercase tracking-widest bg-black/30 px-3 py-1 rounded-full text-center">Tunjuk tangan kiri/kanan pada kamera</p>
                         <div class="w-full bg-white/30 h-2.5 rounded-full border border-white/50 overflow-hidden">
                             <div id="prog-bar" class="bg-yellow-400 h-full w-0 transition-all duration-100"></div>
                         </div>
